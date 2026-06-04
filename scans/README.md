@@ -1,5 +1,4 @@
-# Airport Network Security Monitoring
-
+## airport-soc
 A cybersecurity project that simulates an airport enterprise network, performs security reconnaissance and attack simulations, captures network traffic, and analyzes events using security monitoring techniques.
 
 ## Features
