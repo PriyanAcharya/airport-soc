@@ -1,5 +1,5 @@
 from scapy.all import rdpcap
-from scapy.layers.inet import IP, TCP
+from scapy.layers.inet import IP, TCP, ICMP
 
 
 def read_capture(file_path):
@@ -29,6 +29,11 @@ def read_capture(file_path):
             flags = packet[TCP].flags
             entry["syn"] = bool(flags & 0x02)
 
+        if packet.haslayer(ICMP):
+            entry["protocol"] = "ICMP"
+
         results.append(entry)
 
     return results
+
+
