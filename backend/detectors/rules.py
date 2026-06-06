@@ -33,7 +33,12 @@ def detect_icmp_recon(packets):
     icmp_counts = {}
 
     for packet in packets:
+
         if packet.get("protocol") != "ICMP":
+            continue
+
+        # Only count ICMP Echo Requests
+        if packet.get("icmp_type") != 8:
             continue
 
         src = packet.get("src")
@@ -53,7 +58,9 @@ def detect_icmp_recon(packets):
                 "source_ip": src,
                 "severity": "Medium",
                 "icmp_packets": count,
-                "description": f"Generated {count} ICMP packets"
+                "description": f"Generated {count} ICMP Echo Requests"
             })
 
     return alerts
+
+

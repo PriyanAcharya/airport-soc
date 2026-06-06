@@ -2,35 +2,90 @@
 <html>
 <head>
     <title>Airport SOC Dashboard</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 40px;
+            margin: 30px;
+            background: #f5f7fa;
         }
 
         h1 {
-            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 200px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .card p {
+            margin: 10px 0 0;
+            color: #555;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
+            padding: 12px;
+            border: 1px solid #ddd;
             text-align: left;
         }
 
         th {
-            background-color: #f4f4f4;
+            background: #ececec;
+        }
+
+        .high {
+            color: red;
+            font-weight: bold;
+        }
+
+        .medium {
+            color: orange;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <h1>Airport SOC Dashboard</h1>
+    <h1>🛡️ Airport SOC Dashboard</h1>
+
+    <div class="stats">
+        <div class="card">
+            <h2 id="totalAlerts">0</h2>
+            <p>Total Alerts</p>
+        </div>
+
+        <div class="card">
+            <h2 id="highAlerts">0</h2>
+            <p>High Severity</p>
+        </div>
+
+        <div class="card">
+            <h2 id="mediumAlerts">0</h2>
+            <p>Medium Severity</p>
+        </div>
+    </div>
 
     <table>
         <thead>
@@ -41,34 +96,52 @@
                 <th>Severity</th>
             </tr>
         </thead>
-        <tbody id="alertsTable">
-        </tbody>
+
+        <tbody id="alertsTable"></tbody>
     </table>
 
     <script>
         async function loadAlerts() {
+
             const response = await fetch("/alerts");
             const alerts = await response.json();
 
             const table = document.getElementById("alertsTable");
 
+            let highCount = 0;
+            let mediumCount = 0;
+
             alerts.forEach(alert => {
+
+                if (alert.severity === "High") {
+                    highCount++;
+                }
+
+                if (alert.severity === "Medium") {
+                    mediumCount++;
+                }
+
                 const row = document.createElement("tr");
 
                 row.innerHTML = `
                     <td>${alert.id}</td>
                     <td>${alert.type}</td>
                     <td>${alert.source_ip}</td>
-                    <td>${alert.severity}</td>
+                    <td class="${alert.severity.toLowerCase()}">
+                        ${alert.severity}
+                    </td>
                 `;
 
                 table.appendChild(row);
             });
+
+            document.getElementById("totalAlerts").innerText = alerts.length;
+            document.getElementById("highAlerts").innerText = highCount;
+            document.getElementById("mediumAlerts").innerText = mediumCount;
         }
 
         loadAlerts();
     </script>
 
 </body>
-</html>   
-
+</html>

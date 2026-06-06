@@ -14,7 +14,8 @@ def read_capture(file_path):
             "protocol": None,
             "sport": None,
             "dport": None,
-            "syn": False
+            "syn": False,
+            "icmp_type": None
         }
 
         if packet.haslayer(IP):
@@ -31,9 +32,9 @@ def read_capture(file_path):
 
         if packet.haslayer(ICMP):
             entry["protocol"] = "ICMP"
+            entry["icmp_type"] = packet[ICMP].type
 
         results.append(entry)
 
     return results
-
 
