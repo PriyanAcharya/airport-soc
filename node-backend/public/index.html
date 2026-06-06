@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Airport SOC Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Airport SOC Dashboard</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Source IP</th>
+                <th>Severity</th>
+            </tr>
+        </thead>
+        <tbody id="alertsTable">
+        </tbody>
+    </table>
+
+    <script>
+        async function loadAlerts() {
+            const response = await fetch("/alerts");
+            const alerts = await response.json();
+
+            const table = document.getElementById("alertsTable");
+
+            alerts.forEach(alert => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${alert.id}</td>
+                    <td>${alert.type}</td>
+                    <td>${alert.source_ip}</td>
+                    <td>${alert.severity}</td>
+                `;
+
+                table.appendChild(row);
+            });
+        }
+
+        loadAlerts();
+    </script>
+
+</body>
+</html>   
+
