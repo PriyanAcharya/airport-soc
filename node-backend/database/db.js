@@ -12,6 +12,7 @@ db.serialize(() => {
     db.run(`
         CREATE TABLE IF NOT EXISTS alerts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
             type TEXT,
             source_ip TEXT,
             severity TEXT

@@ -1,12 +1,12 @@
 from parsers.pcap_parser import read_capture
-from detectors.rules import detect_icmp_recon
+from detectors.rules import detect_port_scan
 import requests
 
 packets = read_capture(
-    "../scans/captures/attack_recon.pcapng"
+    "../scans/captures/portscan_attack.pcap"
 )
 
-alerts = detect_icmp_recon(packets)
+alerts = detect_port_scan(packets)
 
 print("\n=== ALERTS ===\n")
 

@@ -21,13 +21,27 @@ app.get("/alerts", (req, res) => {
 });
 
 app.post("/alerts", (req, res) => {
-    const { type, source_ip, severity } = req.body;
+
+    const {
+        type,
+        source_ip,
+        severity
+    } = req.body;
+
+    const timestamp = new Date().toISOString();
 
     db.run(
-        `INSERT INTO alerts (type, source_ip, severity)
-         VALUES (?, ?, ?)`,
-        [type, source_ip, severity],
+        `INSERT INTO alerts
+        (timestamp, type, source_ip, severity)
+        VALUES (?, ?, ?, ?)`,
+        [
+            timestamp,
+            type,
+            source_ip,
+            severity
+        ],
         function(err) {
+
             if (err) {
                 return res.status(500).json({
                     error: err.message
@@ -41,7 +55,6 @@ app.post("/alerts", (req, res) => {
         }
     );
 });
-
 app.get("/seed", (req, res) => {
     db.run(
         `INSERT INTO alerts (type, source_ip, severity)

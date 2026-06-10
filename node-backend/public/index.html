@@ -7,52 +7,52 @@
         body {
             font-family: Arial, sans-serif;
             margin: 30px;
-            background: #f5f7fa;
+            background: #f4f6f9;
         }
 
         h1 {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .stats {
+        .cards {
             display: flex;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .card {
             background: white;
             padding: 20px;
-            border-radius: 10px;
-            width: 200px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            min-width: 180px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .card h2 {
             margin: 0;
-            font-size: 28px;
+            font-size: 16px;
         }
 
         .card p {
-            margin: 10px 0 0;
-            color: #555;
+            font-size: 28px;
+            margin: 10px 0 0 0;
+            font-weight: bold;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         th, td {
-            padding: 12px;
             border: 1px solid #ddd;
+            padding: 12px;
             text-align: left;
         }
 
         th {
-            background: #ececec;
+            background: #efefef;
         }
 
         .high {
@@ -64,84 +64,101 @@
             color: orange;
             font-weight: bold;
         }
+
+        .low {
+            color: green;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
 
-    <h1>🛡️ Airport SOC Dashboard</h1>
+<h1>🛡️ Airport SOC Dashboard</h1>
 
-    <div class="stats">
-        <div class="card">
-            <h2 id="totalAlerts">0</h2>
-            <p>Total Alerts</p>
-        </div>
-
-        <div class="card">
-            <h2 id="highAlerts">0</h2>
-            <p>High Severity</p>
-        </div>
-
-        <div class="card">
-            <h2 id="mediumAlerts">0</h2>
-            <p>Medium Severity</p>
-        </div>
+<div class="cards">
+    <div class="card">
+        <h2>Total Alerts</h2>
+        <p id="totalAlerts">0</p>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Source IP</th>
-                <th>Severity</th>
-            </tr>
-        </thead>
+    <div class="card">
+        <h2>High Severity</h2>
+        <p id="highAlerts">0</p>
+    </div>
 
-        <tbody id="alertsTable"></tbody>
-    </table>
+    <div class="card">
+        <h2>Medium Severity</h2>
+        <p id="mediumAlerts">0</p>
+    </div>
+</div>
 
-    <script>
-        async function loadAlerts() {
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Timestamp</th>
+            <th>MITRE</th>
+            <th>Type</th>
+            <th>Source IP</th>
+            <th>Severity</th>
+        </tr>
+    </thead>
 
-            const response = await fetch("/alerts");
-            const alerts = await response.json();
+    <tbody id="alertsTable"></tbody>
+</table>
 
-            const table = document.getElementById("alertsTable");
+<script>
 
-            let highCount = 0;
-            let mediumCount = 0;
+async function loadAlerts() {
 
-            alerts.forEach(alert => {
+    const response = await fetch("/alerts");
+    const alerts = await response.json();
 
-                if (alert.severity === "High") {
-                    highCount++;
-                }
+    const table = document.getElementById("alertsTable");
 
-                if (alert.severity === "Medium") {
-                    mediumCount++;
-                }
+    document.getElementById("totalAlerts").innerText =
+        alerts.length;
 
-                const row = document.createElement("tr");
+    document.getElementById("highAlerts").innerText =
+        alerts.filter(a => a.severity === "High").length;
 
-                row.innerHTML = `
-                    <td>${alert.id}</td>
-                    <td>${alert.type}</td>
-                    <td>${alert.source_ip}</td>
-                    <td class="${alert.severity.toLowerCase()}">
-                        ${alert.severity}
-                    </td>
-                `;
+    document.getElementById("mediumAlerts").innerText =
+        alerts.filter(a => a.severity === "Medium").length;
 
-                table.appendChild(row);
-            });
+    alerts.forEach(alert => {
 
-            document.getElementById("totalAlerts").innerText = alerts.length;
-            document.getElementById("highAlerts").innerText = highCount;
-            document.getElementById("mediumAlerts").innerText = mediumCount;
+        let mitre = "Unknown";
+
+        if (alert.type === "Reconnaissance") {
+            mitre = "T1595";
         }
 
-        loadAlerts();
-    </script>
+        if (alert.type === "Port Scan") {
+            mitre = "T1046";
+        }
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${alert.id}</td>
+            <td>${alert.timestamp || "-"}</td>
+            <td>${mitre}</td>
+            <td>${alert.type}</td>
+            <td>${alert.source_ip}</td>
+            <td class="${alert.severity.toLowerCase()}">
+                ${alert.severity}
+            </td>
+        `;
+
+        table.appendChild(row);
+    });
+}
+
+loadAlerts();
+
+</script>
 
 </body>
 </html>
+
