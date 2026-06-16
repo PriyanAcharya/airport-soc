@@ -1,71 +1,165 @@
-# Airport SOC Monitoring Platform
+#Airport Security Operations Center (SOC) Monitoring Platform
 
 ## Overview
 
-The Airport SOC Monitoring Platform is a cybersecurity monitoring solution designed for a simulated airport environment. The platform analyzes packet capture (PCAP) files, detects suspicious network activity, stores security alerts, and presents incidents through a Security Operations Center (SOC) dashboard.
+The Airport SOC Monitoring Platform is a cybersecurity monitoring solution developed during an internship project focused on airport network security and Security Operations Center (SOC) workflows.
 
-The project demonstrates practical networking, cybersecurity, packet analysis, backend development, and security monitoring concepts.
+The project simulates how security analysts monitor network traffic, identify suspicious activities, generate alerts, and visualize incidents through a centralized dashboard. A custom detection engine was developed using Python and Scapy to analyze packet captures and identify reconnaissance and port scanning activities mapped to the MITRE ATT&CK framework.
 
----
-
-## Features
-
-### Network Traffic Analysis
-
-* PCAP file parsing using Scapy
-* TCP and ICMP traffic inspection
-* Source and destination IP extraction
-* Port analysis
-
-### Detection Engine
-
-* Reconnaissance Detection (MITRE ATT&CK T1595)
-* Port Scan Detection (MITRE ATT&CK T1046)
-* ICMP Echo Request filtering to reduce false positives
-
-### Alert Management
-
-* Alert generation
-* SQLite alert storage
-* Timestamped incidents
-* REST API integration
-
-### SOC Dashboard
-
-* Alert visualization
-* Timestamp display
-* Severity classification
-* Source IP tracking
+The platform integrates airport network design, packet analysis, attack simulation, backend development, database storage, and dashboard visualization into a complete end-to-end security monitoring workflow.
 
 ---
 
-## Architecture
+## Project Architecture
 
-PCAP File
-
-↓
-
+```text
+Attack Traffic
+      ↓
+Packet Capture (tcpdump)
+      ↓
+PCAP Files
+      ↓
 Scapy Packet Parser
-
-↓
-
+      ↓
 Detection Engine
-
-↓
-
-Alert Generation
-
-↓
-
+      ↓
 Node.js REST API
-
-↓
-
+      ↓
 SQLite Database
+      ↓
+SOC Dashboard
+```
 
-↓
+---
 
-Airport SOC Dashboard
+## Airport Network Topology
+
+The airport environment was designed and simulated using Cisco Packet Tracer.
+
+Security concepts implemented and studied include:
+
+* VLAN Segmentation
+* Access Control Lists (ACLs)
+* DHCP Snooping
+* Dynamic ARP Inspection (DAI)
+* HSRP Redundancy
+* Inter-VLAN Communication Controls
+
+### Airport Network Design
+
+![Airport Network Topology](airport-topology.png)
+
+---
+
+## Detection Engine
+
+A custom detection engine was developed using Python and Scapy to analyze packet captures and identify suspicious activity.
+
+### Implemented Detection Rules
+
+| Detection Rule           | MITRE ATT&CK Technique            | Severity |
+| ------------------------ | --------------------------------- | -------- |
+| Reconnaissance Detection | T1595 – Active Scanning           | Medium   |
+| Port Scan Detection      | T1046 – Network Service Discovery | High     |
+
+### Reconnaissance Detection
+
+The reconnaissance detector identifies excessive ICMP Echo Request activity commonly associated with host discovery and active scanning.
+
+A false-positive issue was identified during development because both ICMP requests and replies were initially counted. The detection logic was improved to analyze only ICMP Type 8 (Echo Request) packets.
+
+### Port Scan Detection
+
+The port scan detector identifies TCP SYN scanning activity by tracking the number of unique destination ports contacted by a source host.
+
+When the configured threshold is exceeded, a high-severity alert is generated.
+
+---
+
+## Attack Simulation and Validation
+
+Instead of relying solely on sample datasets, attack traffic was generated manually using Kali Linux.
+
+### Reconnaissance Simulation
+
+```bash
+for i in {1..20}; do ping -c 1 10.0.2.2; done
+```
+
+Captured using:
+
+```bash
+sudo tcpdump -i eth0 icmp -w recon_attack.pcap
+```
+
+Result:
+
+* Detection Triggered
+* MITRE ATT&CK T1595
+* Medium Severity Alert Generated
+
+### Port Scan Simulation
+
+```bash
+nmap -Pn -sS -p 1-100 10.0.2.2
+```
+
+Captured using:
+
+```bash
+sudo tcpdump -i eth0 tcp -w portscan_attack.pcap
+```
+
+Result:
+
+* Detection Triggered
+* MITRE ATT&CK T1046
+* High Severity Alert Generated
+
+---
+
+## Backend and Database
+
+### Backend
+
+* Node.js
+* Express.js
+* REST API Endpoints
+
+Implemented Endpoints:
+
+```http
+GET  /alerts
+POST /alerts
+```
+
+### Database
+
+SQLite is used to store:
+
+* Alert ID
+* Timestamp
+* Alert Type
+* Source IP Address
+* Severity
+
+---
+
+## SOC Dashboard
+
+A web-based dashboard was developed using HTML, CSS, and JavaScript to provide centralized visibility into security events.
+
+Features:
+
+* Alert Table
+* Severity Classification
+* Alert Statistics
+* Source IP Tracking
+* Incident Visualization
+
+### Dashboard
+
+![Airport SOC Dashboard](dashboard.png)
 
 ---
 
@@ -74,80 +168,54 @@ Airport SOC Dashboard
 ### Networking
 
 * Cisco Packet Tracer
-* VLAN Concepts
-* ACL Concepts
+* VLANs
+* ACLs
 * DHCP Snooping
 * Dynamic ARP Inspection
+* HSRP
 
 ### Cybersecurity
 
 * MITRE ATT&CK Framework
+* Packet Analysis
 * Network Reconnaissance Detection
 * Port Scan Detection
 * SOC Monitoring Concepts
 
-### Backend
-
-* Node.js
-* Express.js
-
-### Database
-
-* SQLite
-
-### Packet Analysis
+### Development
 
 * Python
 * Scapy
-
-### Frontend
-
+* Node.js
+* Express.js
+* SQLite
 * HTML
 * CSS
 * JavaScript
 
 ---
 
-## Detection Rules
+## Key Learning Outcomes
 
-### Reconnaissance Detection
-
-MITRE ATT&CK: T1595
-
-Detects excessive ICMP Echo Request activity generated during network reconnaissance.
-
-### Port Scan Detection
-
-MITRE ATT&CK: T1046
-
-Detects hosts scanning multiple unique destination ports using TCP SYN packets.
+* Enterprise Network Design
+* Security Monitoring Workflows
+* Packet Analysis using Scapy
+* Detection Engineering
+* REST API Development
+* Database Integration
+* SOC Dashboard Development
+* MITRE ATT&CK Mapping
+* Security Event Visualization
 
 ---
 
-## Example Alert
+## Future Enhancements
 
-{
-"id": 1,
-"timestamp": "2026-06-06T09:27:15.921Z",
-"type": "Reconnaissance",
-"source_ip": "10.0.2.15",
-"severity": "Medium"
-}
-
----
-
-## Screenshots
-
-
----
-
-## Future Improvements
-
-* ARP Poisoning Detection
-* SSH Brute Force Detection
+* ARP Poisoning Detection (T1557.002)
+* SSH Brute Force Detection (T1110)
 * Rogue DHCP Detection
+* Real-Time Traffic Monitoring
 * Dashboard Analytics
-* MITRE ATT&CK Visualizations
 * Threat Intelligence Integration
 * Cloud Deployment
 
@@ -155,6 +223,8 @@ Detects hosts scanning multiple unique destination ports using TCP SYN packets.
 
 ## Author
 
-Priyan Acharya
+**Priyan Acharya**
 
-Airport SOC Monitoring Platform 
+Airport Security Operations Center (SOC) Monitoring Platform
+
+Internship Project – Navi Mumbai International Airport
